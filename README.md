@@ -52,17 +52,17 @@ or cover up poisoned data.
 
 Straight from GitHub (no clone needed — `uvx` fetches and builds on first run):
 
-```powershell
-claude mcp add mem9-guard `
-  --env MEM9_API_KEY=<your-key> `
+```bash
+claude mcp add mem9-guard \
+  --env MEM9_API_KEY=<your-key> \
   -- uvx --from git+https://github.com/Riku-KANO/mem9-guard-mcp mem9-guard-mcp
 ```
 
 Or from a local clone (recommended while developing):
 
-```powershell
-claude mcp add mem9-guard `
-  --env MEM9_API_KEY=<your-key> `
+```bash
+claude mcp add mem9-guard \
+  --env MEM9_API_KEY=<your-key> \
   -- uv run --project <path-to-this-repo> mem9-guard-mcp
 ```
 
@@ -94,7 +94,7 @@ Any MCP client that supports stdio servers works, e.g.:
 
 ## Development
 
-```powershell
+```bash
 uv sync
 uv run pytest
 
