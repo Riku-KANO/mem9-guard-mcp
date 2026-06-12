@@ -48,7 +48,17 @@ or cover up poisoned data.
 | `MEM9_GUARD_POLICY` | Path to a policy YAML. Defaults to `Policy.strict()` |
 | `MEM9_GUARD_LOCAL_PATH` | Path of the fallback JSON store (default `mem9_local_store.json`) |
 
-## Registering with Claude Code
+## Installing into Claude Code
+
+Straight from GitHub (no clone needed — `uvx` fetches and builds on first run):
+
+```powershell
+claude mcp add mem9-guard `
+  --env MEM9_API_KEY=<your-key> `
+  -- uvx --from git+https://github.com/Riku-KANO/mem9-guard-mcp mem9-guard-mcp
+```
+
+Or from a local clone (recommended while developing):
 
 ```powershell
 claude mcp add mem9-guard `
@@ -56,14 +66,26 @@ claude mcp add mem9-guard `
   -- uv run --project <path-to-this-repo> mem9-guard-mcp
 ```
 
-Or with any MCP client that supports stdio servers:
+Notes:
+
+- `MEM9_API_KEY` is optional — omit the `--env` line to use the local JSON
+  store fallback.
+- The server is registered for the current project by default; add
+  `--scope user` to make it available in every project.
+- For self-hosted mem9, add `--env MEM9_API_URL=<url>`.
+- Verify with `claude mcp list`, or run `/mcp` in a new session to see the
+  `memory_write` / `memory_read` / ... tools.
+
+### Other MCP clients
+
+Any MCP client that supports stdio servers works, e.g.:
 
 ```json
 {
   "mcpServers": {
     "mem9-guard": {
-      "command": "uv",
-      "args": ["run", "--project", "<path-to-this-repo>", "mem9-guard-mcp"],
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/Riku-KANO/mem9-guard-mcp", "mem9-guard-mcp"],
       "env": { "MEM9_API_KEY": "<your-key>" }
     }
   }
