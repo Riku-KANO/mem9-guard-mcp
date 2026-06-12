@@ -1,19 +1,19 @@
-"""mem9 を agent-memory-guard 越しに公開する MCP サーバー (stdio)。
+"""MCP server (stdio) that exposes mem9 behind agent-memory-guard.
 
-すべてのメモリ操作は MemoryGuard を必ず通過する。エージェント (MCP クライアント) は
-生の mem9 API に触れないため、プロンプトインジェクション・秘密情報・メモリ汚染は
-ポリシーに従って block / quarantine / redact される。
+Every memory operation passes through MemoryGuard. Agents (MCP clients) never
+touch the raw mem9 API, so prompt injection, secrets, and memory poisoning are
+blocked / quarantined / redacted according to policy.
 
-設定 (環境変数):
-    MEM9_API_KEY          mem9 の API キー。未設定ならローカル JSON ストアで動作
-    MEM9_API_URL          既定 https://api.mem9.ai
-    MEM9_AGENT_ID         X-Mnemo-Agent-Id ヘッダ (任意)
-    MEM9_GUARD_POLICY     ポリシー YAML のパス (任意、既定は Policy.strict())
-    MEM9_GUARD_LOCAL_PATH フォールバック JSON のパス (既定 ./mem9_local_store.json)
+Configuration (environment variables):
+    MEM9_API_KEY          mem9 API key. Falls back to a local JSON store when unset
+    MEM9_API_URL          Defaults to https://api.mem9.ai
+    MEM9_AGENT_ID         X-Mnemo-Agent-Id header (optional)
+    MEM9_GUARD_POLICY     Path to a policy YAML (optional, defaults to Policy.strict())
+    MEM9_GUARD_LOCAL_PATH Path of the fallback JSON store (default ./mem9_local_store.json)
 
-意図的に rollback / snapshot 復元はツールとして公開していない。復旧は
-オペレーター操作であり、エージェント自身に与えると汚染データの隠蔽や
-正当な書き込みの破棄に悪用され得るため。
+rollback / snapshot restore is intentionally not exposed as a tool. Recovery is
+an operator action; giving it to agents would let them cover up poisoned data
+or discard legitimate writes.
 """
 from __future__ import annotations
 

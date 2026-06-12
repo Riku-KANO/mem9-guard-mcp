@@ -1,15 +1,17 @@
-"""MemoryStore Protocol アダプタ。
+"""MemoryStore Protocol adapters.
 
-MemoryGuard はストレージ非依存 (get/set/delete/keys/items/__contains__ を満たせばよい)。
-ここで mem9 のレコード指向 API (id ベース) を key/value 契約に適合させる。
+MemoryGuard is storage-agnostic (anything with get/set/delete/keys/items/
+__contains__ works). This module adapts mem9's record-oriented (id-based) API
+to that key/value contract.
 
-マッピング規約:
-  - guard のキーはレコードの metadata["amg_key"] に保存
-  - guard の値は JSON エンコードして content に保存
-  - key→id の対応はクライアント側 index で管理 (初回アクセス時に全件取得して構築)
+Mapping conventions:
+  - the guard's key is stored in the record's metadata["amg_key"]
+  - the guard's value is JSON-encoded and stored in content
+  - the key→id mapping is kept in a client-side index (built by fetching all
+    records on first access)
 
-この index は単一サーバープロセスが唯一の書き手である前提のキャッシュ。
-別プロセスが同じ mem9 名前空間に書き込む構成にする場合は refresh() を呼ぶこと。
+The index is a cache that assumes a single server process is the only writer.
+If another process writes to the same mem9 namespace, call refresh().
 """
 from __future__ import annotations
 
@@ -81,11 +83,11 @@ class Mem9Store:
 
 
 class LocalJsonStore:
-    """mem9 の API キーがない環境向けのローカル JSON ファイルストア。
+    """Local JSON file store for environments without a mem9 API key.
 
-    MEM9_API_KEY 未設定時のフォールバック。インターフェースは Mem9Store と同じ
-    MemoryStore Protocol なので、キーを発行したら環境変数を設定するだけで
-    mem9 バックエンドへ切り替えられる。
+    Fallback used when MEM9_API_KEY is unset. It implements the same
+    MemoryStore Protocol as Mem9Store, so once you have a key, switching to
+    the mem9 backend is just a matter of setting the environment variable.
     """
 
     def __init__(self, path: Any) -> None:

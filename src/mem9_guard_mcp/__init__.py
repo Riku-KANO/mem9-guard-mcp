@@ -1,3 +1,3 @@
-"""mem9-guard-mcp — mem9 を OWASP agent-memory-guard 越しに公開する MCP サーバー。"""
+"""mem9-guard-mcp — MCP server exposing mem9 behind OWASP agent-memory-guard."""
 
 __version__ = "0.1.0"

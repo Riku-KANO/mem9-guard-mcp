@@ -1,13 +1,13 @@
-"""mem9-guard-mcp の stdio スモークテスト。
+"""stdio smoke test for mem9-guard-mcp.
 
-LLM (Claude Code) を介さず、MCP サーバーに JSON-RPC を直接流して
-ガードの挙動を確認する。攻撃文字列が言い換え・検閲されずに
-そのままサーバーへ届くため、再現性のある動作確認ができる。
+Drives the MCP server with raw JSON-RPC, without an LLM (Claude Code) in the
+loop. Attack strings reach the server verbatim — never paraphrased or
+censored — so the guard's behavior can be verified reproducibly.
 
-実行:
+Run:
     uv run python scripts/smoke_stdio.py
 
-MEM9_API_KEY 未設定ならローカル JSON ストア(一時ファイル)で動く。
+Falls back to a local JSON store (temp file) when MEM9_API_KEY is unset.
 """
 from __future__ import annotations
 
@@ -65,12 +65,12 @@ def main() -> int:
         tool_call(7, "security_events", {"limit": 10}),
     ]
     expectations = {
-        2: ("通常の書き込み", lambda r: r.get("status") == "allow"),
-        3: ("読み戻し", lambda r: r.get("value") == "favorite color is blue"),
-        4: ("インジェクションのブロック", lambda r: r.get("status") == "blocked"),
-        5: ("シークレットのリダクト", lambda r: r.get("status") in ("redact", "blocked")),
-        6: ("リダクト後の読み出し", lambda r: "ghp_" not in str(r.get("value", ""))),
-        7: ("監査イベントの記録", lambda r: r.get("total", 0) >= 1),
+        2: ("normal write", lambda r: r.get("status") == "allow"),
+        3: ("read back", lambda r: r.get("value") == "favorite color is blue"),
+        4: ("injection blocked", lambda r: r.get("status") == "blocked"),
+        5: ("secret redacted", lambda r: r.get("status") in ("redact", "blocked")),
+        6: ("read after redaction", lambda r: "ghp_" not in str(r.get("value", ""))),
+        7: ("audit events recorded", lambda r: r.get("total", 0) >= 1),
     }
 
     env = dict(os.environ)
@@ -81,7 +81,7 @@ def main() -> int:
         tmp.close()
         os.unlink(tmp.name)
         env["MEM9_GUARD_LOCAL_PATH"] = tmp.name
-        print(f"(MEM9_API_KEY 未設定: ローカル一時ストア {tmp.name} を使用)\n")
+        print(f"(MEM9_API_KEY is not set: using local temp store {tmp.name})\n")
 
     proc = subprocess.Popen(
         SERVER_CMD,
@@ -96,7 +96,7 @@ def main() -> int:
     for line in messages:
         proc.stdin.write(line + "\n")
     proc.stdin.flush()
-    time.sleep(2.5)  # stdin を閉じる前に全応答の処理を待つ
+    time.sleep(2.5)  # wait for all responses before closing stdin
     proc.stdin.close()
     out, _ = proc.communicate(timeout=30)
 
@@ -115,7 +115,7 @@ def main() -> int:
     for id_, (label, check) in expectations.items():
         got = results.get(id_)
         if got is None:
-            print(f"[FAIL] {label}: 応答なし")
+            print(f"[FAIL] {label}: no response")
             failed += 1
             continue
         ok = check(got)
@@ -123,7 +123,7 @@ def main() -> int:
         failed += 0 if ok else 1
 
     print()
-    print("すべて成功" if failed == 0 else f"{failed} 件失敗")
+    print("all passed" if failed == 0 else f"{failed} failed")
     return 1 if failed else 0
 
 

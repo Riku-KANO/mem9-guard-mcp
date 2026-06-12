@@ -1,20 +1,21 @@
-"""mem9 v1alpha2 REST API の薄いクライアント。
+"""Thin client for the mem9 v1alpha2 REST API.
 
-mem9 (https://github.com/mem9-ai/mem9) のエンドポイント:
+mem9 (https://github.com/mem9-ai/mem9) endpoints:
 
-    POST   /v1alpha2/mem9s/memories        書き込み
-    GET    /v1alpha2/mem9s/memories        検索/一覧 (limit<=200 でページング)
-    GET    /v1alpha2/mem9s/memories/{id}   取得
-    PUT    /v1alpha2/mem9s/memories/{id}   更新
-    DELETE /v1alpha2/mem9s/memories/{id}   削除
+    POST   /v1alpha2/mem9s/memories        create
+    GET    /v1alpha2/mem9s/memories        search/list (paginated, limit<=200)
+    GET    /v1alpha2/mem9s/memories/{id}   get
+    PUT    /v1alpha2/mem9s/memories/{id}   update
+    DELETE /v1alpha2/mem9s/memories/{id}   delete
 
-認証は X-API-Key ヘッダ。エージェント識別は X-Mnemo-Agent-Id。
+Authentication is the X-API-Key header; agent identity is X-Mnemo-Agent-Id.
 
-スキーマはリポジトリの docs/api/openapi.json (OpenAPI) に準拠:
-  - 作成は content/messages の二者択一。KV ストア用途なので content +
-    memory_type="pinned" (同期・原文のまま保存) を使う。messages モードは
-    会話からの fact 抽出が走るため、guard が検査した値の保存には使わない。
-  - 一覧レスポンスは {memories, total, limit, offset}。
+The schema follows docs/api/openapi.json (OpenAPI) in the mem9 repository:
+  - Creation takes either content or messages. For KV-store usage we use
+    content + memory_type="pinned" (synchronous, stored verbatim). The
+    messages mode runs fact extraction over conversations, so it is not used
+    to persist values the guard has already screened.
+  - The list response is {memories, total, limit, offset}.
 """
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ MEMORIES_PATH = "/v1alpha2/mem9s/memories"
 
 
 class Mem9Error(RuntimeError):
-    """mem9 API 呼び出しの失敗。"""
+    """A mem9 API call failed."""
 
 
 class Mem9Client:

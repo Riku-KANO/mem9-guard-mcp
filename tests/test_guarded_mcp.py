@@ -1,4 +1,4 @@
-"""Mem9Store アダプタと MCP ツールの統合テスト (実 mem9 API には接続しない)。"""
+"""Integration tests for the Mem9Store adapter and MCP tools (no real mem9 API calls)."""
 from __future__ import annotations
 
 import itertools
@@ -12,7 +12,7 @@ from mem9_guard_mcp.store import LocalJsonStore, Mem9Store
 
 
 class FakeMem9Client:
-    """Mem9Client と同じインターフェースのインメモリ実装。"""
+    """In-memory implementation of the Mem9Client interface."""
 
     def __init__(self) -> None:
         self._records: dict[str, dict[str, Any]] = {}
